@@ -1,97 +1,91 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Contact List</h2>
-        <a href="{% url 'contact_create'%}" class="btn btn-primary">Add New Contact</a>
-    </div>
+{% extends "base.html" %}
+{% block content %}
+    <body class="bg-light">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Contact List</h2>
+            <a href="{% url 'contact_create'%}" class="btn btn-primary">Add New Contact</a>
+        </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="mb-3">
-                <strong>Sort by:</strong>
-                <a href="?sort=last_name" class="btn btn-sm btn-outline-secondary">Last Name</a>
-                <a href="?sort=-created_at" class="btn btn-sm btn-outline-secondary">Newest First</a>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Sort by:</strong>
+                    <a href="?sort=last_name" class="btn btn-sm btn-outline-secondary">Last Name</a>
+                    <a href="?sort=-created_at" class="btn btn-sm btn-outline-secondary">Newest First</a>
+                </div>
+
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email & Phone</th>
+                            <th>City</th>
+                            <th>Status</th>
+                            <th>Weather</th> <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contact in contacts %}
+                        <tr>
+                            <td>{{ contact.first_name }} {{ contact.last_name }}</td>
+                            <td>
+                                <small>{{ contact.email }}</small><br>
+                                <small class="text-muted">{{ contact.phone_number }}</small>
+                            </td>
+                            <td>{{ contact.city }}</td>
+                            <td><span class="badge bg-info">{{ contact.status.name }}</span></td>
+                            <td class="weather-info" data-city="{{ contact.city }}">
+                                <span class="spinner-border spinner-border-sm text-secondary"></span>
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="#" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center">No contacts found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-
-            <table class="table table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Name</th>
-                        <th>Email & Phone</th>
-                        <th>City</th>
-                        <th>Status</th>
-                        <th>Weather</th> <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for contact in contacts %}
-                    <tr>
-                        <td>{{ contact.first_name }} {{ contact.last_name }}</td>
-                        <td>
-                            <small>{{ contact.email }}</small><br>
-                            <small class="text-muted">{{ contact.phone_number }}</small>
-                        </td>
-                        <td>{{ contact.city }}</td>
-                        <td><span class="badge bg-info">{{ contact.status.name }}</span></td>
-                        <td class="weather-info" data-city="{{ contact.city }}">
-                            <span class="spinner-border spinner-border-sm text-secondary"></span>
-                        </td>
-                        <td>
-                            <a href="#" class="btn btn-sm btn-warning">Edit</a>
-                            <a href="#" class="btn btn-sm btn-danger">Delete</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="6" class="text-center">No contacts found.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-    const weatherCells = document.querySelectorAll('.weather-info');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        const weatherCells = document.querySelectorAll('.weather-info');
 
-    weatherCells.forEach(cell => {
-        const city = cell.getAttribute('data-city');
-        if (!city) return;
+        weatherCells.forEach(cell => {
+            const city = cell.getAttribute('data-city');
+            if (!city) return;
 
-        fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`)
-            .then(response => response.json())
-            .then(geoData => {
-                if (geoData.length > 0) {
-                    const lat = geoData[0].lat;
-                    const lon = geoData[0].lon;
+            fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`)
+                .then(response => response.json())
+                .then(geoData => {
+                    if (geoData.length > 0) {
+                        const lat = geoData[0].lat;
+                        const lon = geoData[0].lon;
 
-                    return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`);
-                }
-                throw new Error('City not found');
-            })
-            .then(response => response.json())
-            .then(weatherData => {
-                const current = weatherData.current;
-                cell.innerHTML = `
-                    🌡️ ${current.temperature_2m}°C |
-                    💧 ${current.relative_humidity_2m}% |
-                    💨 ${current.wind_speed_10m} km/h
-                `;
-            })
-            .catch(error => {
-                console.error('Error fetching weather:', error);
-                cell.innerHTML = '<span class="text-muted">N/A</span>';
-            });
+                        return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`);
+                    }
+                    throw new Error('City not found');
+                })
+                .then(response => response.json())
+                .then(weatherData => {
+                    const current = weatherData.current;
+                    cell.innerHTML = `
+                        🌡️ ${current.temperature_2m}°C |
+                        💧 ${current.relative_humidity_2m}% |
+                        💨 ${current.wind_speed_10m} km/h
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error fetching weather:', error);
+                    cell.innerHTML = '<span class="text-muted">N/A</span>';
+                });
+        });
     });
-});
-</script>
-</body>
-</html>
+    </script>
+    </body>
+{% endblock %}
