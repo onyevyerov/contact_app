@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ContactForm
 from .models import Contact
 
@@ -27,3 +27,21 @@ def contact_create(request):
         form = ContactForm()
 
     return render(request, 'contact_create.html', {'form': form})
+
+
+def contact_edit(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+
+    if request.method == "POST":
+        form = ContactForm(request.POST, instance=contact)
+        if form.is_valid():
+            form.save()
+            return redirect('contact_list')
+    else:
+        form = ContactForm(instance=contact)
+
+    return render(request, 'contact_edit.html', {
+        'form': form,
+        'contact': contact,
+        'is_edit': True
+    })
