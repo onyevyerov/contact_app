@@ -15,7 +15,7 @@ class Contact(models.Model):
     first_name = models.CharField(max_length=55)
     last_name = models.CharField(max_length=55)
     phone_number = models.CharField(max_length=15, unique=True)
-    email = models.EmailField(null=True)
+    email = models.EmailField(null=True, unique=True)
     city = models.CharField(max_length=55)
     status = models.ForeignKey(
         ContactStatus, on_delete=models.PROTECT, related_name="contacts"
