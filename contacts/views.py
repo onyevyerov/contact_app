@@ -1,5 +1,6 @@
 from django.shortcuts import render
-
+from django.urls import reverse_lazy
+from .forms import ContactForm
 from .models import Contact
 
 
@@ -15,3 +16,15 @@ def contact_list(request):
         'contacts': contacts,
         'current_sort': sort_by
     })
+
+
+def contact_create(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return reverse_lazy('core:contact_list')
+    else:
+        form = ContactForm()
+
+    return render(request, 'templates/contact_create.html', {'form': form})
