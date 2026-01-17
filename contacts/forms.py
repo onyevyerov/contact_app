@@ -1,9 +1,4 @@
 from django import forms
-
-from contacts.models import Contact
-
-
-from django import forms
 from .models import Contact
 
 class ContactForm(forms.ModelForm):
