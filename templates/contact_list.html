@@ -89,39 +89,59 @@
         const deleteForm = document.getElementById('deleteForm');
         deleteForm.action = "/delete/" + contactId + "/";
     });
+
     document.addEventListener('DOMContentLoaded', function() {
-    const weatherCells = document.querySelectorAll('.weather-info');
+        const weatherCells = document.querySelectorAll('.weather-info');
+        const CACHE_TIME = 15 * 60 * 1000;
 
-    weatherCells.forEach(cell => {
-        const city = cell.getAttribute('data-city');
-        if (!city) return;
+        weatherCells.forEach(cell => {
+            const city = cell.getAttribute('data-city');
+            if (!city) return;
 
-        fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`)
-            .then(response => response.json())
-            .then(geoData => {
-                if (geoData.length > 0) {
-                    const lat = geoData[0].lat;
-                    const lon = geoData[0].lon;
+            const cachedData = localStorage.getItem(`weather_${city}`);
+            if (cachedData) {
+                const parsed = JSON.parse(cachedData);
+                const now = new Date().getTime();
 
-                    return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`);
+                if (now - parsed.timestamp < CACHE_TIME) {
+                    renderWeather(cell, parsed.data);
+                    return;
                 }
-                throw new Error('City not found');
-            })
-            .then(response => response.json())
-            .then(weatherData => {
-                const current = weatherData.current;
-                cell.innerHTML = `
-                    🌡️ ${current.temperature_2m}°C |
-                    💧 ${current.relative_humidity_2m}% |
-                    💨 ${current.wind_speed_10m} km/h
-                `;
-            })
-            .catch(error => {
-                console.error('Error fetching weather:', error);
-                cell.innerHTML = '<span class="text-muted">N/A</span>';
-            });
+            }
+
+            fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`)
+                .then(response => response.json())
+                .then(geoData => {
+                    if (geoData.length > 0) {
+                        const lat = geoData[0].lat;
+                        const lon = geoData[0].lon;
+                        return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`);
+                    }
+                    throw new Error('City not found');
+                })
+                .then(response => response.json())
+                .then(weatherData => {
+                    const dataToSave = {
+                        timestamp: new Date().getTime(),
+                        data: weatherData.current
+                    };
+                    localStorage.setItem(`weather_${city}`, JSON.stringify(dataToSave));
+                    renderWeather(cell, weatherData.current);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    cell.innerHTML = '<span class="text-muted">N/A</span>';
+                });
+        });
+
+        function renderWeather(cell, current) {
+            cell.innerHTML = `
+                🌡️ ${current.temperature_2m}°C |
+                💧 ${current.relative_humidity_2m}% |
+                💨 ${current.wind_speed_10m} km/h
+            `;
+        }
     });
-});
 </script>
 
 {% endblock %}
