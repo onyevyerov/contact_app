@@ -7,4 +7,3 @@ from contacts.models import Contact
 class ContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
-

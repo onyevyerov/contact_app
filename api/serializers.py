@@ -11,6 +11,16 @@ class ContactStatusSerializer(serializers.ModelSerializer):
 
 class ContactSerializer(serializers.ModelSerializer):
     status = ContactStatusSerializer(read_only=True)
+
     class Meta:
         model = Contact
-        fields = ["id", "first_name", "last_name", "email", "phone_number", "city", "status", "created_at"]
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "city",
+            "status",
+            "created_at",
+        ]

@@ -1,12 +1,15 @@
 import requests
 
+
 def get_coords(city_name):
     """
     Function returns latitude and longitude coordinates of provided city
     Accept: city name
     Return: tuple of coordinates
     """
-    geo_url = f"https://nominatim.openstreetmap.org/search?q={city_name}&format=json&limit=1"
+    geo_url = (
+        f"https://nominatim.openstreetmap.org/search?q={city_name}&format=json&limit=1"
+    )
     geo_response = requests.get(geo_url).json()
 
     if not geo_response:
@@ -34,6 +37,6 @@ def get_weather(lat, lon):
     weather = {
         "temp": current_data.get("temperature_2m", "-"),
         "humidity": current_data.get("relative_humidity_2m", "-"),
-        "wind": current_data.get("wind_speed_10m", "-")
+        "wind": current_data.get("wind_speed_10m", "-"),
     }
     return weather

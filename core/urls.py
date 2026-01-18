@@ -20,7 +20,7 @@ from django.urls import path, include
 from contacts import views
 
 urlpatterns = [
-    path("", views.contact_list, name='contact_list'),
+    path("", views.contact_list, name="contact_list"),
     path("", include("contacts.urls", namespace="contacts")),
     path("", include("api.urls", namespace="api")),
 ]
