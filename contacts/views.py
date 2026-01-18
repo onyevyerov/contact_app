@@ -80,7 +80,9 @@ def import_contacts_csv(request):
 
         try:
             data_set = csv_file.read().decode("UTF-8")
+            # Convert string data into an IO stream to make it iterable for the CSV reader
             io_string = io.StringIO(data_set)
+            # Skip the header row to avoid importing column names as data
             next(io_string)
 
             for row in csv.reader(io_string, delimiter=",", quotechar='"'):
