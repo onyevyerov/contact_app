@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Import Contacts from CSV</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Plik powinien mieć kolumny: Imię, Nazwisko, Telefon, Email, Miasto, Status.</p>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Wybierz plik .csv</label>
+                            <input type="file" name="file" class="form-control" accept=".csv" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">Rozpocznij import</button>
+                            <a href="{% url 'contact_list' %}" class="btn btn-outline-secondary">Anuluj</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
