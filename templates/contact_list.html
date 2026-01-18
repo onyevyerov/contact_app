@@ -3,17 +3,30 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Contact List</h2>
-        <a href="{% url 'contact_create'%}" class="btn btn-primary">Add New Contact</a>
+        <div class="d-flex gap-2">
+            <a href="{% url 'import_contacts_csv' %}" class="btn btn-outline-success">Import CSV</a>
+            <a href="{% url 'contact_create' %}" class="btn btn-primary">Add New Contact</a>
+        </div>
     </div>
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <div class="mb-3">
-                <strong>Sort by:</strong>
-                <a href="?sort=last_name" class="btn btn-sm btn-outline-secondary">Last Name</a>
-                <a href="?sort=-created_at" class="btn btn-sm btn-outline-secondary">Newest First</a>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <form method="get" action="" class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Search by name or email..." value="{{ query|default:'' }}">
+                        <button class="btn btn-outline-primary" type="submit">Search</button>
+                        {% if query %}
+                            <a href="{% url 'contact_list' %}" class="btn btn-outline-secondary">Clear</a>
+                        {% endif %}
+                    </form>
+                </div>
+                <div class="col-md-6 text-end">
+                    <strong>Sort by:</strong>
+                    <a href="?sort=last_name{% if query %}&q={{ query }}{% endif %}" class="btn btn-sm btn-outline-secondary">Last Name</a>
+                    <a href="?sort=-created_at{% if query %}&q={{ query }}{% endif %}" class="btn btn-sm btn-outline-secondary">Newest First</a>
+                </div>
             </div>
-
             <table class="table table-hover">
                 <thead class="table-dark">
                     <tr>
