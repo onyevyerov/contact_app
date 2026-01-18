@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Contact List</h2>
+        <div class="d-flex gap-2">
+            <a href="{% url 'contacts:import_contacts_csv' %}" class="btn btn-outline-success">Import CSV</a>
+            <a href="{% url 'contacts:contact_create' %}" class="btn btn-primary">Add New Contact</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <form method="get" action="" class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Search by name or email..." value="{{ query|default:'' }}">
+                        <button class="btn btn-outline-primary" type="submit">Search</button>
+                        {% if query %}
+                            <a href="{% url 'contact_list' %}" class="btn btn-outline-secondary">Clear</a>
+                        {% endif %}
+                    </form>
+                </div>
+                <div class="col-md-6 text-end">
+                    <strong>Sort by:</strong>
+                    <a href="?sort=last_name{% if query %}&q={{ query }}{% endif %}" class="btn btn-sm btn-outline-secondary">Last Name</a>
+                    <a href="?sort=-created_at{% if query %}&q={{ query }}{% endif %}" class="btn btn-sm btn-outline-secondary">Newest First</a>
+                </div>
+            </div>
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email & Phone</th>
+                        <th>City</th>
+                        <th>Status</th>
+                        <th>Weather</th> <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contact in contacts %}
+                    <tr>
+                        <td>{{ contact.first_name }} {{ contact.last_name }}</td>
+                        <td>
+                            <small>{{ contact.email }}</small><br>
+                            <small class="text-muted">{{ contact.phone_number }}</small>
+                        </td>
+                        <td>{{ contact.city }}</td>
+                        <td><span class="badge bg-info">{{ contact.status.name }}</span></td>
+                        <td class="weather-info" data-city="{{ contact.city }}">
+                            <span class="spinner-border spinner-border-sm text-secondary"></span>
+                        </td>
+                        <td>
+                            <a href="{% url 'contacts:contact_edit' contact.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                            <button type="button"
+                                    class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal"
+                                    data-contact-id="{{ contact.pk }}"
+                                    data-contact-name="{{ contact.first_name }} {{ contact.last_name }}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center">No contacts found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete contact: <strong id="contactNameDisplay"></strong>?
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" action="">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const contactId = button.getAttribute('data-contact-id');
+        const contactName = button.getAttribute('data-contact-name');
+
+        document.getElementById('contactNameDisplay').textContent = contactName;
+
+        const deleteForm = document.getElementById('deleteForm');
+        deleteForm.action = "/delete/" + contactId + "/";
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const weatherCells = document.querySelectorAll('.weather-info');
+        const CACHE_TIME = 15 * 60 * 1000;
+
+        weatherCells.forEach(cell => {
+            const city = cell.getAttribute('data-city');
+            if (!city) return;
+
+            const cachedData = localStorage.getItem(`weather_${city}`);
+            if (cachedData) {
+                const parsed = JSON.parse(cachedData);
+                const now = new Date().getTime();
+
+                if (now - parsed.timestamp < CACHE_TIME) {
+                    renderWeather(cell, parsed.data);
+                    return;
+                }
+            }
+
+            fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`)
+                .then(response => response.json())
+                .then(geoData => {
+                    if (geoData.length > 0) {
+                        const lat = geoData[0].lat;
+                        const lon = geoData[0].lon;
+                        return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`);
+                    }
+                    throw new Error('City not found');
+                })
+                .then(response => response.json())
+                .then(weatherData => {
+                    const dataToSave = {
+                        timestamp: new Date().getTime(),
+                        data: weatherData.current
+                    };
+                    localStorage.setItem(`weather_${city}`, JSON.stringify(dataToSave));
+                    renderWeather(cell, weatherData.current);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    cell.innerHTML = '<span class="text-muted">N/A</span>';
+                });
+        });
+
+        function renderWeather(cell, current) {
+            cell.innerHTML = `
+                🌡️ ${current.temperature_2m}°C |
+                💧 ${current.relative_humidity_2m}% |
+                💨 ${current.wind_speed_10m} km/h
+            `;
+        }
+    });
+</script>
+
+{% endblock %}
