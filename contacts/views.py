@@ -2,6 +2,7 @@ import csv
 import io
 
 from django.contrib import messages
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
@@ -10,18 +11,26 @@ from .models import Contact, ContactStatus
 
 
 def contact_list(request):
+    query = request.GET.get('q')
     sort_by = request.GET.get('sort', '-created_at')
 
-    if sort_by not in ['last_name', '-last_name', 'created_at', '-created_at']:
-        sort_by = '-created_at'
+    contacts = Contact.objects.all()
 
-    contacts = Contact.objects.all().order_by(sort_by)
+    if query:
+        contacts = contacts.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(email__icontains=query)
+        )
 
-    return render(request, "contact_list.html", {
+    if sort_by in ['last_name', '-last_name', 'created_at', '-created_at']:
+        contacts = contacts.order_by(sort_by)
+
+    return render(request, 'contact_list.html', {
         'contacts': contacts,
-        'current_sort': sort_by
+        'current_sort': sort_by,
+        'query': query
     })
-
 
 def contact_create(request):
     if request.method == 'POST':
