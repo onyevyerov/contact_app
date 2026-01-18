@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
+
 from .forms import ContactForm
 from .models import Contact
 
@@ -45,3 +47,9 @@ def contact_edit(request, pk):
         'contact': contact,
         'is_edit': True
     })
+
+@require_POST
+def contact_delete(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+    contact.delete()
+    return redirect('contact_list')
