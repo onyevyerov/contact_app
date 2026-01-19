@@ -33,8 +33,13 @@ A professional recruitment task built with **Django**, featuring a robust contac
 2. **Install dependencies:**:
    ```bash
    pip install -r requirements.txt
+
+3. **Create and run migrations**:
+   ```bash
+   python manage.py makemigrations
+   python manage.py migrate
    
-3. **Run the application**:
+4. **Run the application**:
    ```bash
    python manage.py runserver
    
