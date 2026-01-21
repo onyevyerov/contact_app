@@ -28,7 +28,7 @@ A professional recruitment task built with **Django**, featuring a robust contac
 1. **Clone the repository**:
    ```bash
    git clone <repository-url>
-   cd supra_project
+   cd contact_app
    
 2. **Install dependencies:**:
    ```bash
