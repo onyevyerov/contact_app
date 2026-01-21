@@ -39,7 +39,10 @@ A professional recruitment task built with **Django**, featuring a robust contac
    python manage.py makemigrations
    python manage.py migrate
    
-4. **Run the application**:
+4. **Create .env file from .env.sample and add your SECRET_KEY**
+
+
+5. **Run the application**:
    ```bash
    python manage.py runserver
    
