@@ -1,65 +1,78 @@
 # Contact Management System with Weather Integration
 
-A professional recruitment task built with **Django**, featuring a robust contact database, dynamic weather updates, and bulk data processing.
+A Django-based contact management application built as a technical recruitment task. Features full CRUD operations, live weather data for each contact's city via Open-Meteo API, bulk CSV import with upsert logic, and a REST API powered by Django REST Framework.
 
-## 🚀 Key Features
+## Tech Stack
 
-### 1. Contact Management (CRUD)
-* **Full CRUD Operations**: Efficiently Create, Read, Update, and Delete contacts.
-* **Search & Filter**: Real-time searching by first name, last name, or email.
-* **Smart Sorting**: Toggle views between alphabetical order (last name) or latest additions.
-* **User Experience**: Integrated Bootstrap modals for deletion confirmation to prevent accidental data loss.
+- **Backend:** Python 3.x, Django 5.x, Django REST Framework
+- **Frontend:** Bootstrap 5, Vanilla JavaScript (Fetch API, localStorage)
+- **External APIs:** Open-Meteo (weather), Nominatim (geocoding)
+- **Containerization:** Docker
 
-### 2. Weather Integration (AJAX + Caching)
-* **Live Weather Data**: Fetches current temperature, humidity, and wind speed for each contact's city using the **Open-Meteo API**.
-* **Performance Optimization**: Implements `localStorage` caching. Weather data is stored for 15 minutes to minimize external API calls and ensure lightning-fast page reloads.
+## Features
 
-### 3. Bulk Data Import (CSV)
-* **Automated Importer**: A dedicated tool to upload and process `.csv` files.
-* **Data Integrity**: Features "upsert" logic—it automatically updates existing records based on email or creates new ones, ensuring no duplicate entries.
-* **Smart Relations**: Automatically handles and creates `ContactStatus` relationships during the import process.
+### Contact Management (CRUD)
+- Full Create, Read, Update, Delete operations
+- Search by first name, last name, or email
+- Sorting by last name or creation date
+- Bootstrap modals for deletion confirmation
 
-### 4. REST API
-* **Django REST Framework**: Fully documented API endpoints available at `/api/contacts/`.
-* **Standard Methods**: Supports GET, POST, PUT, and DELETE for seamless third-party integration.
+### Weather Integration (AJAX + Caching)
+- Live temperature, humidity, and wind speed for each contact's city
+- Geocoding via Nominatim API (city name → coordinates)
+- localStorage caching (15 min TTL) to minimize external API calls
 
-## 📦 Installation & Setup
+### Bulk Data Import (CSV)
+- Upload and process `.csv` files
+- Upsert logic — updates existing records by email or creates new ones
+- Automatic `ContactStatus` relationship handling
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repository-url>
-   cd contact_app
-   
-2. **Install dependencies:**:
-   ```bash
-   pip install -r requirements.txt
+### REST API
+- Endpoints at `/api/contacts/`
+- Supports GET, POST, PUT, DELETE
 
-3. **Create and run migrations**:
-   ```bash
-   python manage.py makemigrations
-   python manage.py migrate
-   
-4. **Create .env file from .env.sample and add your SECRET_KEY**
+## Getting Started
 
+### Prerequisites
 
-5. **Run the application**:
-   ```bash
-   python manage.py runserver
-   
-## 📥 Testing the Import Feature
+- Python 3.10+ **or** Docker
 
-A sample file named `test_contacts.csv` is included in the root directory for immediate testing.
+### Run with Docker
 
-**How to test:**
+```bash
+git clone https://github.com/onyevyerov/contact_app.git
+cd contact_app
+cp .env.sample .env   # edit with your SECRET_KEY
+docker-compose up --build
+```
+The app will be available at `http://localhost:8000/`.
 
-1.  **Navigate** to the **Import CSV** page in the application.
-2.  **Select** the `test_contacts.csv` file from your project folder.
-3.  **Submit** the form. The system is programmed to skip the header row and correctly map all contact fields.
+### Run locally
 
----
+```bash
+git clone https://github.com/onyevyerov/contact_app.git
+cd contact_app
+python -m venv venv
+source venv/bin/activate        # Linux/macOS
+# venv\Scripts\activate         # Windows
 
-## 🛠️ Tech Stack
+pip install -r requirements.txt
+cp .env.sample .env             # edit with your SECRET_KEY
 
-* **Backend**: Python 3.x, Django 5.x, Django REST Framework.
-* **Frontend**: Bootstrap 5, Vanilla JavaScript (Fetch API, LocalStorage).
-* **External APIs**: Open-Meteo (Weather), Nominatim (Geocoding).
+python manage.py migrate
+python manage.py runserver
+```
+
+## Testing the CSV Import
+
+A sample file `test_contacts.csv` is included in the root directory.
+
+1. Open the application and navigate to **Import CSV**
+2. Select `test_contacts.csv`
+3. Submit — the system skips the header row and maps all fields automatically
+
+## Edit .env.sample file
+
+```
+SECRET_KEY=<write_here_your_secret_key>
+```
