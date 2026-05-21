@@ -1,6 +1,6 @@
 # Contact Management System with Weather Integration
 
-A Django-based contact management application built as a technical recruitment task. Features full CRUD operations, live weather data for each contact's city via Open-Meteo API, bulk CSV import with upsert logic, and a REST API powered by Django REST Framework.
+A Django-based contact management application which features full CRUD operations, live weather data for each contact's city via Open-Meteo API, bulk CSV import with upsert logic, and a REST API powered by Django REST Framework.
 
 ## Tech Stack
 
